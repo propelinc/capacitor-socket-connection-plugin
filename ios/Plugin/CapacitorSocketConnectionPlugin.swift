@@ -4,6 +4,7 @@ import Capacitor
 @objc(CapacitorSocketConnectionPluginPlugin)
 public class CapacitorSocketConnectionPluginPlugin: CAPPlugin, SocketDelegate {
     private var socketsMap: [SocketUuid: Socket] = [:]
+    private let queue = DispatchQueue(label: "com.propel.ebenefits.socketsMap.queue")
     
     private let mappers = Mappers()
     
@@ -17,7 +18,10 @@ public class CapacitorSocketConnectionPluginPlugin: CAPPlugin, SocketDelegate {
                 let socketOptions = SocketOptions(host: options.host, port: options.port)
                 
                 let socket = try Socket(uuid: link.uuid, options: socketOptions, delegate: self)
-                socketsMap[link.uuid] = socket
+                
+                queue.sync {
+                    socketsMap[link.uuid] = socket
+                }
                 
                 try await socket.open()
                 
@@ -86,7 +90,9 @@ public class CapacitorSocketConnectionPluginPlugin: CAPPlugin, SocketDelegate {
     }
     
     private func removeSocket(_ socket: Socket) {
-        socketsMap.removeValue(forKey: socket.uuid)
+        queue.sync {
+            socketsMap.removeValue(forKey: socket.uuid)
+        }
     }
     
     private func findSocketByLink(_ link: NativeLink) throws -> Socket {
