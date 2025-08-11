@@ -1,4 +1,5 @@
-import {Plugin, registerPlugin} from '@capacitor/core';
+import type {Plugin} from '@capacitor/core';
+import {registerPlugin} from '@capacitor/core';
 
 type PluginImplementation = unknown;
 type PluginRegistration = () => PluginImplementation;
