@@ -96,10 +96,11 @@ public class CapacitorSocketConnectionPluginPlugin: CAPPlugin, SocketDelegate {
     }
     
     private func findSocketByLink(_ link: NativeLink) throws -> Socket {
-        guard let found = socketsMap.first(where: { s in s.key == link.uuid }) else {
+        let socket = queue.sync { socketsMap[link.uuid] }
+        guard let socket else {
             throw SocketError("Cannot find socket with provided uuid")
         }
-        return found.value
+        return socket
     }
     
     private func success(_ call: CAPPluginCall, _ data: PluginCallResultData = [:]) {
